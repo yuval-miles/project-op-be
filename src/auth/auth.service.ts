@@ -72,9 +72,9 @@ export class AuthService {
 
     return res.send({ message: 'Logged in successfully' });
   }
-  async signOut(dto: AuthDto) {
-    const { email, password } = dto;
-    return '';
+  async signOut(res: Response) {
+    res.clearCookie('token');
+    return res.send({ message: 'Logged out successfully' });
   }
 
   async hashPassword(password: string) {
