@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Post, Req, Res, Session } from '@nestjs/common';
-import { Response } from 'express';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { SignupDto } from './dto/signup.dto';
+import { JwtAuthGuard } from './guard/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -22,11 +31,9 @@ export class AuthController {
     return this.authService.signOut(res);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('')
-  async getAuthSession(@Session() session: Record<string, any>) {
-    session.authenticated = true;
-    console.log(session);
-    console.log(session.id);
-    return session;
+  async getAuth(@Req() req: Request) {
+    return req.user;
   }
 }

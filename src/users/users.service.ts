@@ -1,5 +1,4 @@
 import {
-  Delete,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -11,12 +10,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async getMyUser(id: string, req: Request) {
-    const foundUser = await this.prisma.user.findUnique({ where: { id } });
+    const foundUser = await this.prisma.user.findUnique({
+      where: { id },
+      select: { username: true, email: true, id: true },
+    });
     if (!foundUser) throw new NotFoundException();
     const decodedUser = req.user as { id: string; email: string };
 
     if (foundUser.id !== decodedUser.id) throw new ForbiddenException();
-    // delete foundUser.hash;
-    return { foundUser };
+
+    return { message: 'success', response: foundUser };
   }
 }

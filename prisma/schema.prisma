@@ -15,4 +15,5 @@ model User {
   username   String     @unique
   email      String     @unique
   hash       String
+  picture    String? 
 }

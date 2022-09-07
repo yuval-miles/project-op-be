@@ -66,16 +66,18 @@ export class AuthService {
     }
     const token = await this.signToken({
       id: foundUser.id,
-      email: foundUser.email,
+      username: foundUser.username,
+      picture: foundUser.picture,
     });
     if (!token) {
       throw new ForbiddenException();
     }
 
-    res.cookie('token', token);
+    res.cookie('token', token, { httpOnly: true });
 
     return res.send({ message: 'Logged in successfully' });
   }
+
   async signOut(res: Response) {
     res.clearCookie('token');
     return res.send({ message: 'Logged out successfully' });
@@ -90,7 +92,11 @@ export class AuthService {
     return await bcrypt.compare(args.password, args.hash);
   }
 
-  async signToken(args: { id: string; email: string }) {
+  async signToken(args: {
+    id: string;
+    username: string;
+    picture: string | null;
+  }) {
     const payload = args;
     const secret = this.config.get('JWT_SECRET');
     return this.jwt.signAsync(payload, { secret: secret });
