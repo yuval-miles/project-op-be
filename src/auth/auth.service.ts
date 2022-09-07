@@ -83,6 +83,16 @@ export class AuthService {
     return res.send({ message: 'Logged out successfully' });
   }
 
+  async checkEmail(email: string) {
+    if (!email) return false;
+    const found = await this.prisma.user.findUnique({
+      where: {
+        email: email.replace(/['"]+/g, ''),
+      },
+    });
+    return !!found;
+  }
+
   async hashPassword(password: string) {
     const saltOrRounds = 10;
     return await bcrypt.hash(password, saltOrRounds);

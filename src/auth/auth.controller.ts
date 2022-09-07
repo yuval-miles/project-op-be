@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -29,6 +30,11 @@ export class AuthController {
   @Get('signout')
   signOut(@Res() res: Response) {
     return this.authService.signOut(res);
+  }
+
+  @Get('checkemail')
+  checkEmail(@Query() { email }: { email: string }) {
+    return this.authService.checkEmail(email);
   }
 
   @UseGuards(JwtAuthGuard)
