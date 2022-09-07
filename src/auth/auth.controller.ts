@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, Session } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
@@ -20,5 +20,13 @@ export class AuthController {
   @Get('signout')
   signOut(@Res() res: Response) {
     return this.authService.signOut(res);
+  }
+
+  @Get('')
+  async getAuthSession(@Session() session: Record<string, any>) {
+    session.authenticated = true;
+    console.log(session);
+    console.log(session.id);
+    return session;
   }
 }

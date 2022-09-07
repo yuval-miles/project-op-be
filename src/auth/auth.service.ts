@@ -8,12 +8,16 @@ import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { jwtSecret } from 'src/utils/constants';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
 
   async signup(dto: SignupDto) {
     const { email, username, password } = dto;
@@ -88,6 +92,7 @@ export class AuthService {
 
   async signToken(args: { id: string; email: string }) {
     const payload = args;
-    return this.jwt.signAsync(payload, { secret: jwtSecret });
+    const secret = this.config.get('JWT_SECRET');
+    return this.jwt.signAsync(payload, { secret: secret });
   }
 }
