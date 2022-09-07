@@ -11,9 +11,34 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(cuid())
-  username   String     @unique
-  email      String     @unique
-  hash       String
-  picture    String? 
+  id        String    @id @default(cuid())
+  username  String    @unique
+  email     String    @unique
+  hash      String
+  picture   String?
+  posts     Post[]
+  likes     Like[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  picture   String?
+  userId    String
+  text      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  likes     Like[]
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String?
+  postId    String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
 }
