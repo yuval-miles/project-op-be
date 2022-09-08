@@ -1,5 +1,4 @@
 import {
-  BadGatewayException,
   BadRequestException,
   ForbiddenException,
   Injectable,
@@ -56,14 +55,14 @@ export class AuthService {
     });
 
     if (!foundUser) {
-      throw new BadGatewayException('Wrong credentials');
+      throw new BadRequestException('Email or password is incorrect');
     }
     const isMatch = await this.comparePasswords({
       password,
       hash: foundUser.hash,
     });
     if (!isMatch) {
-      throw new BadGatewayException('Wrong credentials');
+      throw new BadRequestException('Email or password is incorrect');
     }
     const token = await this.signToken({
       id: foundUser.id,
