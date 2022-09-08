@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  BadRequestException,
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
@@ -29,10 +30,10 @@ export class AuthService {
     });
 
     if (foundEmail) {
-      throw new BadGatewayException('Email already exists');
+      throw new BadRequestException('Email already exists');
     }
     if (foundUsername) {
-      throw new BadGatewayException('Username already exists');
+      throw new BadRequestException('Username already exists');
     }
 
     const hash = await this.hashPassword(password);
