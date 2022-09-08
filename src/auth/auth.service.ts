@@ -72,6 +72,7 @@ export class AuthService {
     if (!token) {
       throw new ForbiddenException();
     }
+    console.log('this is a test');
 
     res.cookie('token', token, { httpOnly: true });
 
