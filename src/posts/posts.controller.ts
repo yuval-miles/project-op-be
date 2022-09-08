@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
 import { Response } from 'express';
 import { PostsService } from './posts.service';
@@ -12,6 +22,12 @@ export class PostsController {
   @Post('createPost')
   createPost(@Body() dto: PostDto, @Res() res: Response) {
     return this.postsService.createPost(dto, res);
+  }
+
+  // @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  deletePost(@Param() params: { id: string }, @Res() res: Response) {
+    return this.postsService.deletePost(params.id, res);
   }
 
   @UseGuards(JwtAuthGuard)

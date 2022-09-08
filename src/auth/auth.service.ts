@@ -73,7 +73,7 @@ export class AuthService {
       throw new ForbiddenException();
     }
     res.cookie('token', token, {
-      httpOnly: true,
+      httpOnly: this.config.get('NODE_ENV') === 'development' ? false : true,
       secure: this.config.get('NODE_ENV') === 'development' ? false : true,
       sameSite: this.config.get('NODE_ENV') === 'development' ? 'lax' : 'none',
     });
