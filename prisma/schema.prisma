@@ -26,6 +26,8 @@ model Post {
   id        String    @id @default(cuid())
   picture   String?
   userId    String
+  anon      Boolean   @default(false)
+  comments  Boolean   @default(false)
   text      String
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
