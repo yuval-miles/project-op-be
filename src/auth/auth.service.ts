@@ -8,7 +8,7 @@ import { SignupDto } from './dto/signup.dto';
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -84,6 +84,13 @@ export class AuthService {
   async signOut(res: Response) {
     res.clearCookie('token');
     return res.send({ message: 'Logged out successfully' });
+  }
+
+  async getAuth(req: Request) {
+    if (req.cookies && 'token' in req.cookies) {
+      return req.cookies.token;
+    }
+    return false;
   }
 
   async checkEmail(email: string) {
