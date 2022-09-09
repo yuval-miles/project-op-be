@@ -88,7 +88,7 @@ export class AuthService {
 
   async getAuth(req: Request) {
     if (req.cookies && 'token' in req.cookies) {
-      return req.cookies.token;
+      return this.jwt.decode(req.cookies.token);
     }
     return false;
   }
