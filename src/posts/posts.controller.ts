@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -13,6 +14,7 @@ import { PostDto } from './dto/post.dto';
 import { Response } from 'express';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { FilterDto } from './dto/posts-filter.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -30,9 +32,13 @@ export class PostsController {
     return this.postsService.deletePost(params.id, res);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('getAllPosts')
-  getAllPosts(@Res() res: Response) {
-    return this.postsService.getAllPosts(res);
+  // @UseGuards(JwtAuthGuard)
+  @Get()
+  getPosts(@Res() res: Response, @Query() filterDto: FilterDto) {
+    if (Object.keys(filterDto).length) {
+      return this.postsService.getPostsById(filterDto, res);
+    } else {
+      return this.postsService.getAllPosts(res);
+    }
   }
 }

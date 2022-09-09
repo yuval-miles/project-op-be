@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { ServerResponse } from 'http';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
+import { FilterDto } from './dto/posts-filter.dto';
 
 @Injectable()
 export class PostsService {
@@ -47,5 +48,24 @@ export class PostsService {
   async getAllPosts(res: Response) {
     this.posts = await this.prisma.post.findMany();
     return res.send({ message: 'success', response: this.posts });
+  }
+
+  async getPostsById(filterDto: FilterDto, res: Response) {
+    const { userId } = filterDto;
+    console.log(userId);
+    let posts;
+    if (userId) {
+      posts = await this.prisma.post.findMany({
+        where: {
+          userId: {
+            equals: userId,
+          },
+        },
+      });
+      console.log(posts);
+    } else {
+      throw new NotFoundException('Post not found');
+    }
+    return res.send({ message: 'success', response: posts });
   }
 }
