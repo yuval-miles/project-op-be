@@ -3,9 +3,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Post } from '@prisma/client';
-import { Request, Response } from 'express';
-import { ServerResponse } from 'http';
+
+import { Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -14,40 +13,49 @@ import { FilterDto } from './dto/posts-filter.dto';
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  private posts: Post[] = [];
   async createPost(dto: PostDto, res: Response) {
     const { text, picture, userId, anon, comments } = dto;
-
-    const newPost = await this.prisma.post.create({
-      data: {
-        text,
-        picture,
-        userId,
-        anon,
-        comments,
-      },
-    });
-
-    if (!newPost)
+    let newPost;
+    try {
+      newPost = await this.prisma.post.create({
+        data: {
+          text,
+          picture,
+          userId,
+          anon,
+          comments,
+        },
+      });
+    } catch {
       throw new InternalServerErrorException(
         'Something went wrong, please try again later',
       );
+    }
     return res.send({ message: 'Posted successfully', response: newPost });
   }
 
   async deletePost(postId: string, res: Response) {
-    const deletePost = await this.prisma.post.delete({
-      where: {
-        id: postId,
-      },
-    });
-    if (!deletePost) throw new NotFoundException('Post not found');
+    try {
+      await this.prisma.post.delete({
+        where: {
+          id: postId,
+        },
+      });
+    } catch {
+      throw new NotFoundException('Post not found');
+    }
 
-    return res.send({ message: 'Deleted successfully', response: deletePost });
+    return res.send({ message: 'Deleted successfully' });
   }
   async getAllPosts(res: Response) {
-    this.posts = await this.prisma.post.findMany();
-    return res.send({ message: 'success', response: this.posts });
+    try {
+      const posts = await this.prisma.post.findMany();
+      return res.send({ message: 'success', response: posts });
+    } catch {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later',
+      );
+    }
   }
 
   async getPostsById(filterDto: FilterDto, res: Response) {
@@ -55,17 +63,20 @@ export class PostsService {
     console.log(userId);
     let posts;
     if (userId) {
-      posts = await this.prisma.post.findMany({
-        where: {
-          userId: {
-            equals: userId,
+      try {
+        posts = await this.prisma.post.findMany({
+          where: {
+            userId: {
+              equals: userId,
+            },
           },
-        },
-      });
-      console.log(posts);
-    } else {
-      throw new NotFoundException('Post not found');
+        });
+        if (posts.length === 0) throw new NotFoundException('Posts not found');
+      } catch (err) {
+        throw err;
+      }
     }
+
     return res.send({ message: 'success', response: posts });
   }
 }

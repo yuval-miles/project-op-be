@@ -3,5 +3,3 @@ export class FilterDto {
   userId?: string;
   sort?: string;
 }
-
-
