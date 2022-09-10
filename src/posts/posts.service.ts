@@ -47,9 +47,14 @@ export class PostsService {
 
     return res.send({ message: 'Deleted successfully' });
   }
-  async getAllPosts(res: Response) {
+  async getAllPosts(res: Response, filterDto: FilterDto) {
+    const { sort } = filterDto;
     try {
-      const posts = await this.prisma.post.findMany();
+      const posts = await this.prisma.post.findMany({
+        orderBy: {
+          updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
+        },
+      });
       return res.send({ message: 'success', response: posts });
     } catch {
       throw new InternalServerErrorException(
@@ -59,8 +64,7 @@ export class PostsService {
   }
 
   async getPostsById(filterDto: FilterDto, res: Response) {
-    const { userId } = filterDto;
-    console.log(userId);
+    const { userId, sort } = filterDto;
     let posts;
     if (userId) {
       try {
@@ -70,11 +74,16 @@ export class PostsService {
               equals: userId,
             },
           },
+          orderBy: {
+            updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
+          },
         });
         if (posts.length === 0) throw new NotFoundException('Posts not found');
       } catch (err) {
         throw err;
       }
+    } else {
+      this.getAllPosts(res, filterDto);
     }
 
     return res.send({ message: 'success', response: posts });
