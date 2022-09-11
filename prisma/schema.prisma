@@ -39,8 +39,14 @@ model Like {
   id        String   @id @default(cuid())
   userId    String?
   postId    String?
+  type      LikeType
   createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+}
+
+enum LikeType {
+  like
+  dislike
 }
