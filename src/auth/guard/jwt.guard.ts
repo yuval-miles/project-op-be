@@ -9,15 +9,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     else if (context.getType() === 'ws') {
       const client = context.switchToWs().getClient<Socket>();
       const authHeader = client.handshake.headers.authentication;
-      if (!authHeader || typeof authHeader !== 'string')
-        return {
-          headers: {
-            authorization: '',
-          },
-        };
       return {
         headers: {
-          authorization: authHeader,
+          authorization:
+            authHeader && typeof authHeader === 'string' ? authHeader : '',
         },
       };
     }
