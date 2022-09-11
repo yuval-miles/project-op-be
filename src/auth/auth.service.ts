@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  InternalServerErrorException,
   Injectable,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -21,42 +22,53 @@ export class AuthService {
 
   async signup(dto: SignupDto) {
     const { email, username, password } = dto;
-    const foundEmail = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    const foundUsername = await this.prisma.user.findUnique({
-      where: { username },
-    });
+    try {
+      const foundEmail = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      const foundUsername = await this.prisma.user.findUnique({
+        where: { username },
+      });
 
-    if (foundEmail) {
-      throw new BadRequestException('Email already exists');
-    }
-    if (foundUsername) {
-      throw new BadRequestException('Username already exists');
-    }
+      if (foundEmail) {
+        throw new BadRequestException('Email already exists');
+      }
+      if (foundUsername) {
+        throw new BadRequestException('Username already exists');
+      }
 
-    const hash = await this.hashPassword(password);
-    await this.prisma.user.create({
-      data: {
-        email,
-        hash,
-        username,
-      },
-    });
+      const hash = await this.hashPassword(password);
+      await this.prisma.user.create({
+        data: {
+          email,
+          hash,
+          username,
+        },
+      });
+    } catch (err) {
+      throw err;
+    }
 
     return { message: 'signup was successful' };
   }
 
   async signIn(dto: AuthDto, res: Response) {
     const { email, password } = dto;
-
-    const foundUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
+    let foundUser;
+    try {
+      foundUser = await this.prisma.user.findUnique({
+        where: { email },
+      });
+    } catch {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later',
+      );
+    }
 
     if (!foundUser) {
       throw new BadRequestException('Email or password is incorrect');
     }
+
     const isMatch = await this.comparePasswords({
       password,
       hash: foundUser.hash,
@@ -73,7 +85,7 @@ export class AuthService {
       throw new ForbiddenException();
     }
     res.cookie('token', token, {
-      httpOnly: true,
+      httpOnly: this.config.get('NODE_ENV') === 'development' ? false : true,
       secure: this.config.get('NODE_ENV') === 'development' ? false : true,
       sameSite: this.config.get('NODE_ENV') === 'development' ? 'lax' : 'none',
     });
@@ -98,12 +110,19 @@ export class AuthService {
 
   async checkEmail(email: string) {
     if (!email) return false;
-    const found = await this.prisma.user.findUnique({
-      where: {
-        email: email.replace(/['"]+/g, ''),
-      },
-    });
-    return !!found;
+    try {
+      const found = await this.prisma.user.findUnique({
+        where: {
+          email: email.replace(/['"]+/g, ''),
+        },
+      });
+
+      return !!found;
+    } catch {
+      throw new InternalServerErrorException(
+        'Something went wrong, please try again later.',
+      );
+    }
   }
 
   async hashPassword(password: string) {

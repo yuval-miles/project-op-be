@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class PostDto {
   @IsNotEmpty()
@@ -12,4 +12,12 @@ export class PostDto {
   @IsNotEmpty()
   @IsString()
   public userId: string;
+
+  @IsBoolean()
+  @IsOptional()
+  public anon: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  public comments: boolean;
 }
