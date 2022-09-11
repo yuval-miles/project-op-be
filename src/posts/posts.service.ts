@@ -47,23 +47,8 @@ export class PostsService {
 
     return res.send({ message: 'Deleted successfully' });
   }
-  async getAllPosts(res: Response, filterDto: FilterDto) {
-    const { sort } = filterDto;
-    try {
-      const posts = await this.prisma.post.findMany({
-        orderBy: {
-          updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
-        },
-      });
-      return res.send({ message: 'success', response: posts });
-    } catch {
-      throw new InternalServerErrorException(
-        'Something went wrong, please try again later',
-      );
-    }
-  }
 
-  async getPostsById(filterDto: FilterDto, res: Response) {
+  async getAllPosts(filterDto: FilterDto, res: Response) {
     const { userId, sort } = filterDto;
     let posts;
     if (userId) {
@@ -83,7 +68,19 @@ export class PostsService {
         throw err;
       }
     } else {
-      this.getAllPosts(res, filterDto);
+      try {
+        const posts = await this.prisma.post.findMany({
+          orderBy: {
+            updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
+          },
+        });
+
+        return res.send({ message: 'success', response: posts });
+      } catch {
+        throw new InternalServerErrorException(
+          'Something went wrong, please try again later',
+        );
+      }
     }
 
     return res.send({ message: 'success', response: posts });

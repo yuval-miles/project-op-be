@@ -34,10 +34,6 @@ export class PostsController {
   // @UseGuards(JwtAuthGuard)
   @Get()
   getPosts(@Res() res: Response, @Query() filterDto: FilterDto) {
-    if (filterDto.userId) {
-      return this.postsService.getPostsById(filterDto, res);
-    } else {
-      return this.postsService.getAllPosts(res, filterDto);
-    }
+    return this.postsService.getAllPosts(filterDto, res);
   }
 }
