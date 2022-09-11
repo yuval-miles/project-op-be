@@ -88,7 +88,10 @@ export class AuthService {
 
   async getAuth(req: Request) {
     if (req.cookies && 'token' in req.cookies) {
-      return this.jwt.decode(req.cookies.token);
+      const payload = this.jwt.decode(req.cookies.token);
+      if (typeof payload === 'object')
+        return { ...payload, raw: req.cookies.token };
+      else return false;
     }
     return false;
   }
