@@ -80,6 +80,7 @@ export class AuthService {
       id: foundUser.id,
       username: foundUser.username,
       picture: foundUser.picture,
+      email: foundUser.email,
     });
     if (!token) {
       throw new ForbiddenException();
@@ -139,6 +140,7 @@ export class AuthService {
     id: string;
     username: string;
     picture: string | null;
+    email: string;
   }) {
     const payload = args;
     const secret = this.config.get('JWT_SECRET');
