@@ -99,6 +99,7 @@ export class AuthService {
   }
 
   async getAuth(req: Request) {
+    console.log(req.cookies);
     if (req.cookies && 'token' in req.cookies) {
       const payload = this.jwt.decode(req.cookies.token);
       if (typeof payload === 'object')

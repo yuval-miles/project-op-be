@@ -1,10 +1,11 @@
 import {
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -34,17 +35,19 @@ export class PostsService {
     return res.send({ message: 'Posted successfully', response: newPost });
   }
 
-  async deletePost(postId: string, res: Response) {
+  async deletePost(postId: string, res: Response, req: Request) {
     try {
       await this.prisma.post.delete({
         where: {
           id: postId,
         },
       });
-    } catch {
+    } catch (err) {
       throw new NotFoundException('Post not found');
     }
-
+    const decodedUser = req.user as { id: string; email: string };
+    if (postId !== decodedUser.id)
+      throw new ForbiddenException('You can delete only yours posts');
     return res.send({ message: 'Deleted successfully' });
   }
 

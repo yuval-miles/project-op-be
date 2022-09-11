@@ -6,11 +6,12 @@ import {
   Param,
   Post,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -26,8 +27,12 @@ export class PostsController {
   }
 
   @Delete(':id')
-  deletePost(@Param() params: { id: string }, @Res() res: Response) {
-    return this.postsService.deletePost(params.id, res);
+  deletePost(
+    @Param() params: { id: string },
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    return this.postsService.deletePost(params.id, res, req);
   }
 
   @Get()
