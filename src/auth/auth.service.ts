@@ -127,10 +127,10 @@ export class AuthService {
     }
   }
 
-  async hashPassword(password: string) {
+  hashPassword = async (password: string) => {
     const saltOrRounds = 10;
     return await bcrypt.hash(password, saltOrRounds);
-  }
+  };
 
   async comparePasswords(args: { password: string; hash: string }) {
     return await bcrypt.compare(args.password, args.hash);

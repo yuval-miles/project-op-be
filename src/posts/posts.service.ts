@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { Response, Request } from 'express';
+import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
 import { FilterDto } from './dto/posts-filter.dto';
