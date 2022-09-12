@@ -24,29 +24,34 @@ export class PostGateway {
 
   @SubscribeMessage('likeEvent')
   async handleLikeEvent(@MessageBody() { userId, postId, type }: PostLikeDto) {
-    const found = await this.prisma.like.findFirst({
+    const found = await this.prisma[type].findFirst({
       where: {
         AND: {
           userId,
           postId,
-          type,
         },
       },
     });
     if (found)
-      await this.prisma.like.delete({
+      await this.prisma[type].delete({
         where: {
           id: found.id,
         },
       });
     else
-      await this.prisma.like.create({
-        data: {
-          userId,
-          postId,
-          type,
-        },
-      });
+      type === 'like'
+        ? await this.prisma.like.create({
+            data: {
+              userId,
+              postId,
+            },
+          })
+        : await this.prisma.disLike.create({
+            data: {
+              userId,
+              postId,
+            },
+          });
     this.server.emit(postId, {
       action: found
         ? type === 'like'

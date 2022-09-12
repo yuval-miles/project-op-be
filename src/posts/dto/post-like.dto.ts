@@ -12,7 +12,7 @@ export class PostLikeDto {
 
   @IsNotEmpty()
   @IsEnum(Like)
-  public type: 'like' | 'dislike';
+  public type: 'like' | 'disLike';
 
   @IsNotEmpty()
   @IsString()

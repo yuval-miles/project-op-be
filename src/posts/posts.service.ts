@@ -1,12 +1,10 @@
 import {
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 
-import { Response, Request } from 'express';
-import { AuthService } from 'src/auth/auth.service';
+import { Response } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -36,25 +34,41 @@ export class PostsService {
     return res.send({ message: 'Posted successfully', response: newPost });
   }
 
-  async deletePost(postId: string, res: Response, req: Request) {
+  async deletePost(postId: string, res: Response) {
     try {
       await this.prisma.post.delete({
         where: {
           id: postId,
         },
       });
-    } catch (err) {
+    } catch {
       throw new NotFoundException('Post not found');
     }
-    const decodedUser = req.user as { id: string; email: string };
-    if (postId !== decodedUser.id)
-      throw new ForbiddenException('You can delete only yours posts');
+
     return res.send({ message: 'Deleted successfully' });
   }
 
   async getAllPosts(filterDto: FilterDto, res: Response) {
-    const { userId, sort } = filterDto;
+    const { userId, sort, sortBy } = filterDto;
     let posts;
+    const orderBy =
+      sortBy && sort
+        ? sortBy === 'likes'
+          ? {
+              likes: {
+                _count: sort,
+              },
+            }
+          : sortBy === 'date'
+          ? {
+              updatedAt: sort,
+            }
+          : {
+              disLikes: {
+                _count: sort,
+              },
+            }
+        : {};
     if (userId) {
       try {
         posts = await this.prisma.post.findMany({
@@ -63,8 +77,10 @@ export class PostsService {
               equals: userId,
             },
           },
-          orderBy: {
-            updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
+          orderBy,
+          include: {
+            likes: true,
+            dislikes: true,
           },
         });
         if (posts.length === 0) throw new NotFoundException('Posts not found');
@@ -74,11 +90,12 @@ export class PostsService {
     } else {
       try {
         const posts = await this.prisma.post.findMany({
-          orderBy: {
-            updatedAt: sort === 'by_date_desc' ? 'desc' : 'asc',
+          orderBy,
+          include: {
+            likes: true,
+            dislikes: true,
           },
         });
-
         return res.send({ message: 'success', response: posts });
       } catch {
         throw new InternalServerErrorException(
