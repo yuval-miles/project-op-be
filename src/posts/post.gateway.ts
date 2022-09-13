@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { arch } from 'os';
 import { Server } from 'socket.io';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -24,7 +25,7 @@ export class PostGateway {
 
   @SubscribeMessage('likeEvent')
   async handleLikeEvent(@MessageBody() { userId, postId, type }: PostLikeDto) {
-    const found = await this.prisma[type].findFirst({
+    const foundLike = await this.prisma.like.findFirst({
       where: {
         AND: {
           userId,
@@ -32,34 +33,81 @@ export class PostGateway {
         },
       },
     });
-    if (found)
-      await this.prisma[type].delete({
-        where: {
-          id: found.id,
+    const foundDisLike = await this.prisma.disLike.findFirst({
+      where: {
+        AND: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    const addLike = async () => {
+      await this.prisma.like.create({
+        data: {
+          userId,
+          postId,
         },
       });
-    else
-      type === 'like'
-        ? await this.prisma.like.create({
-            data: {
-              userId,
-              postId,
-            },
-          })
-        : await this.prisma.disLike.create({
-            data: {
-              userId,
-              postId,
-            },
-          });
+    };
+    const addDisLike = async () => {
+      await this.prisma.disLike.create({
+        data: {
+          userId,
+          postId,
+        },
+      });
+    };
+    const removeLike = async () => {
+      foundLike &&
+        (await this.prisma.like.delete({
+          where: {
+            id: foundLike.id,
+          },
+        }));
+    };
+
+    const removeDislike = async () => {
+      foundDisLike &&
+        (await this.prisma.disLike.delete({
+          where: {
+            id: foundDisLike.id,
+          },
+        }));
+    };
+    let action;
+    try {
+      if (type === 'like') {
+        if (foundLike) {
+          await removeLike();
+          action = 'removeLike';
+        } else {
+          await addLike();
+          action = 'addLike';
+          if (foundDisLike) {
+            action += '&&removeDislike';
+            await removeDislike();
+          }
+        }
+      }
+      if (type === 'disLike') {
+        if (foundDisLike) {
+          await removeDislike();
+          action = 'removeDislike';
+        } else {
+          await addDisLike();
+          action = 'addDislike';
+          if (foundLike) {
+            action += '&&removeLike';
+            await removeLike();
+          }
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
     this.server.emit(postId, {
-      action: found
-        ? type === 'like'
-          ? 'removeLike'
-          : 'removeDislike'
-        : type === 'like'
-        ? 'addLike'
-        : 'addDislike',
+      action: action,
     });
   }
 }
