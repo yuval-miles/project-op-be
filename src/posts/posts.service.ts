@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostDto } from './dto/post.dto';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -48,8 +48,9 @@ export class PostsService {
     return res.send({ message: 'Deleted successfully' });
   }
 
-  async getAllPosts(filterDto: FilterDto, res: Response) {
+  async getAllPosts(filterDto: FilterDto, res: Response, req: Request) {
     const { userId, sort, sortBy } = filterDto;
+    const decodedUser = req.user as { id: string };
     let posts;
     const orderBy =
       sortBy && sort
@@ -92,11 +93,35 @@ export class PostsService {
         const posts = await this.prisma.post.findMany({
           orderBy,
           include: {
-            likes: true,
-            dislikes: true,
+            likes: {
+              select: {
+                id: true,
+                userId: true,
+              },
+            },
+            dislikes: {
+              select: { id: true },
+            },
           },
         });
-        return res.send({ message: 'success', response: posts });
+        const myLikes = await this.prisma.like.findMany({
+          include: {
+            post: {
+              select: {
+                id: true,
+              },
+            },
+          },
+          where: {
+            userId: decodedUser.id,
+          },
+        });
+        const myLikesObj: { [key: string]: boolean } = {};
+        myLikes.forEach((el) => (myLikesObj[el.post?.id as string] = true));
+        return res.send({
+          message: 'success',
+          response: { posts, myLikesObj },
+        });
       } catch {
         throw new InternalServerErrorException(
           'Something went wrong, please try again later',

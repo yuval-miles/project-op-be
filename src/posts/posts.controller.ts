@@ -6,11 +6,12 @@ import {
   Param,
   Post,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { PostDto } from './dto/post.dto';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { FilterDto } from './dto/posts-filter.dto';
@@ -31,7 +32,11 @@ export class PostsController {
   }
 
   @Get()
-  getPosts(@Res() res: Response, @Query() filterDto: FilterDto) {
-    return this.postsService.getAllPosts(filterDto, res);
+  getPosts(
+    @Res() res: Response,
+    @Req() req: Request,
+    @Query() filterDto: FilterDto,
+  ) {
+    return this.postsService.getAllPosts(filterDto, res, req);
   }
 }
