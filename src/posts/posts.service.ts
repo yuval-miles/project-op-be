@@ -52,7 +52,8 @@ export class PostsService {
     const { userId, sort, sortBy } = filterDto;
     const decodedUser = req.user as { id: string };
     let posts;
-    const orderBy =
+
+    let orderBy =
       sortBy && sort
         ? sortBy === 'likes'
           ? {
@@ -69,7 +70,8 @@ export class PostsService {
                 _count: sort,
               },
             }
-        : {};
+        : undefined;
+    !orderBy ? (orderBy = { updatedAt: 'desc' }) : orderBy;
     if (userId) {
       try {
         posts = await this.prisma.post.findMany({
@@ -116,11 +118,27 @@ export class PostsService {
             userId: decodedUser.id,
           },
         });
+        const myDislikes = await this.prisma.disLike.findMany({
+          include: {
+            post: {
+              select: {
+                id: true,
+              },
+            },
+          },
+          where: {
+            userId: decodedUser.id,
+          },
+        });
         const myLikesObj: { [key: string]: boolean } = {};
         myLikes.forEach((el) => (myLikesObj[el.post?.id as string] = true));
+        const myDislikesObj: { [key: string]: boolean } = {};
+        myDislikes.forEach(
+          (el) => (myDislikesObj[el.post?.id as string] = true),
+        );
         return res.send({
           message: 'success',
-          response: { posts, myLikesObj },
+          response: { posts, myLikesObj, myDislikesObj },
         });
       } catch {
         throw new InternalServerErrorException(
