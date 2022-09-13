@@ -19,22 +19,24 @@ model User {
   posts     Post[]
   likes     Like[]
   dislikes  DisLike[]
+  comments  Comment[]
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 }
 
 model Post {
-  id        String    @id @default(cuid())
-  picture   String?
-  userId    String
-  anon      Boolean   @default(false)
-  comments  Boolean   @default(false)
-  text      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  likes     Like[]
-  dislikes  DisLike[]
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String    @id @default(cuid())
+  picture       String?
+  userId        String
+  anon          Boolean   @default(false)
+  comments      Boolean   @default(false)
+  text          String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  likes         Like[]
+  dislikes      DisLike[]
+  commentsArray Comment[]
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Like {
@@ -57,3 +59,13 @@ model DisLike {
   post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
 }
 
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String?
+  postId    String?
+  message   String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+}
