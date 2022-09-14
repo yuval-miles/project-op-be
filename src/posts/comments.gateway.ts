@@ -39,6 +39,13 @@ export class CommentGateway {
     if (action === 'create') {
       newComment = await this.prisma.comment.create({
         data: { postId, userId, message },
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
+        },
       });
     } else if (userId === found.userId) {
       await this.prisma.comment.delete({
@@ -47,8 +54,8 @@ export class CommentGateway {
     } else {
       throw new ForbiddenException();
     }
-    this.server.emit('success', {
-      action: commentId ? newComment : 'comment deleted successfully',
+    this.server.emit(postId, {
+      action: !commentId ? newComment : 'comment deleted successfully',
     });
   }
 }
