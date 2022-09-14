@@ -102,9 +102,20 @@ export class AuthService {
   async getAuth(req: Request) {
     if (req.cookies && 'token' in req.cookies) {
       const payload = this.jwt.decode(req.cookies.token);
-      if (typeof payload === 'object')
-        return { ...payload, raw: req.cookies.token };
-      else return false;
+      if (typeof payload === 'object') {
+        const userData = await this.prisma.user.findUnique({
+          where: {
+            id: payload!.id as string,
+          },
+          select: {
+            picture: true,
+            email: true,
+            username: true,
+            id: true,
+          },
+        });
+        return { ...payload, raw: req.cookies.token, userData };
+      } else return false;
     }
     return false;
   }

@@ -3,14 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService, private auth: AuthService) {}
+  constructor(
+    private prisma: PrismaService,
+    private auth: AuthService,
+    private config: ConfigService,
+  ) {}
   async getMyUser(id: string, req: Request) {
     try {
       const foundUser = await this.prisma.user.findUnique({
@@ -63,7 +68,6 @@ export class UsersService {
           hash: hashed || foundUser.hash,
         },
       });
-
       return { message: 'User successfully updated', response: updatedUser };
     } catch (err) {
       throw err;

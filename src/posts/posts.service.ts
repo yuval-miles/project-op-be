@@ -14,7 +14,7 @@ export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   async createPost(dto: PostDto, res: Response) {
-    const { text, picture, userId, anon, comments, username } = dto;
+    const { text, picture, userId, anon, comments } = dto;
     let newPost;
     try {
       newPost = await this.prisma.post.create({
@@ -23,7 +23,6 @@ export class PostsService {
           picture,
           userId,
           anon,
-
           comments,
         },
       });
@@ -88,6 +87,7 @@ export class PostsService {
             user: {
               select: {
                 username: true,
+                picture: true,
               },
             },
           },
@@ -113,6 +113,7 @@ export class PostsService {
             user: {
               select: {
                 username: true,
+                picture: true,
               },
             },
           },
