@@ -85,6 +85,11 @@ export class PostsService {
           include: {
             likes: true,
             dislikes: true,
+            user: {
+              select: {
+                username: true,
+              },
+            },
           },
         });
         if (posts.length === 0) throw new NotFoundException('Posts not found');
@@ -104,6 +109,11 @@ export class PostsService {
             },
             dislikes: {
               select: { id: true },
+            },
+            user: {
+              select: {
+                username: true,
+              },
             },
           },
         });
