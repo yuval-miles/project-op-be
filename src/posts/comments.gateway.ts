@@ -14,7 +14,7 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostCommentDto } from './dto/post-comment.dto';
 
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @WebSocketGateway({
   cors: {
     origin: 'http://127.0.0.1:5173',
@@ -47,7 +47,7 @@ export class CommentGateway {
     } else {
       throw new ForbiddenException();
     }
-    this.server.emit('succes', {
+    this.server.emit('success', {
       action: commentId ? newComment : 'comment deleted successfully',
     });
   }
