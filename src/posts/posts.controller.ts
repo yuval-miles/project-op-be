@@ -15,7 +15,7 @@ import { Response, Request } from 'express';
 import { PostsService } from './posts.service';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { FilterDto } from './dto/posts-filter.dto';
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -38,9 +38,8 @@ export class PostsController {
   ) {
     return this.postsService.getAllPosts(filterDto, res, req);
   }
-  @Get('/:postId/getcomments')
-  getPostsComments(@Param() params: { postId: string }) {
-    console.log(params);
-    return this.postsService.getPostsComments(params.postId);
+  @Get('getcomments/:id')
+  getPostsComments(@Param() params: { id: string }) {
+    return this.postsService.getPostsComments(params.id);
   }
 }

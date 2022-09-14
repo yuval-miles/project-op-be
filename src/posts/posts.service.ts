@@ -155,8 +155,18 @@ export class PostsService {
     let comments;
     try {
       comments = await this.prisma.comment.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
         where: {
           postId: postId,
+        },
+        include: {
+          user: {
+            select: {
+              username: true,
+            },
+          },
         },
       });
     } catch {
