@@ -13,6 +13,10 @@ export class PostDto {
   @IsString()
   public userId: string;
 
+  @IsNotEmpty()
+  @IsString()
+  public username: string;
+
   @IsBoolean()
   @IsOptional()
   public anon: boolean;
