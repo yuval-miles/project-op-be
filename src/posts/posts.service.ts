@@ -149,4 +149,19 @@ export class PostsService {
 
     return res.send({ message: 'success', response: posts });
   }
+
+  async getPostsComments(postId: string) {
+    let comments;
+    try {
+      comments = await this.prisma.comment.findMany({
+        where: {
+          postId: postId,
+        },
+      });
+    } catch {
+      throw new NotFoundException('Comments not found');
+    }
+
+    return { message: 'Success!', comments };
+  }
 }

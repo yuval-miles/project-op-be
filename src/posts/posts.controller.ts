@@ -17,7 +17,7 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { FilterDto } from './dto/posts-filter.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
-@UseGuards(JwtAuthGuard)
+
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
@@ -38,5 +38,9 @@ export class PostsController {
     @Query() filterDto: FilterDto,
   ) {
     return this.postsService.getAllPosts(filterDto, res, req);
+  }
+  @Get('/:id/getcomments')
+  getPostsComments(@Param() params: { postId: string }) {
+    return this.postsService.getPostsComments(params.postId);
   }
 }
