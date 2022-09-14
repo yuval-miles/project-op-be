@@ -176,6 +176,7 @@ export class PostsService {
           user: {
             select: {
               username: true,
+              picture: true,
             },
           },
         },

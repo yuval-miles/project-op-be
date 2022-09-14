@@ -43,6 +43,7 @@ export class CommentGateway {
           user: {
             select: {
               username: true,
+              picture: true,
             },
           },
         },
@@ -54,7 +55,7 @@ export class CommentGateway {
     } else {
       throw new ForbiddenException();
     }
-    this.server.emit(postId, {
+    this.server.emit(`${postId}comment`, {
       action: !commentId ? newComment : 'comment deleted successfully',
     });
   }
