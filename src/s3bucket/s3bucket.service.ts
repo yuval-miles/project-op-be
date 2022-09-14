@@ -18,7 +18,7 @@ export class S3bucketService {
     };
     return {
       message: 'success',
-      url: await this.s3.getSignedUrlPromise('putObject', params),
+      response: await this.s3.getSignedUrlPromise('putObject', params),
     };
   }
 }
